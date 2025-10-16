@@ -251,16 +251,17 @@
       });
     }
 
+    // ====== KORTSTE PROMPT ======
     function makePrompt(){
       const hex = selectedHex(kleurKozijn);
       const text = kleurKozijn.value;
       const finish = afwerking.value.toLowerCase();
       return [
-        "Ultra realistic SAME facade. Apply ONLY these targets:",
-        `WINDOW FRAMES (uPVC): ${text} (${hex||'requested tone'}), ${finish}, recessed/deep profile.`,
-        "IF PRESENT: also update DOORS and any CLADDING to harmonize with the chosen frame color (same tone & finish).",
-        "Do NOT change non-target areas: bricks, plaster, roof, gutters, paving, garden, vehicles, sky, curtains, reflections."
-      ].join(" ");
+        `Replace only window frames and doors with ${text}${hex?` (${hex})`:''}, ${finish}, deep uPVC style.`,
+        'Match façade cladding if present.',
+        'Do not change walls/brickwork, roof, ground, people, vehicles, sky, or background.',
+        'Keep lighting, geometry, and perspective identical.'
+      ].join(' ');
     }
 
     async function callAPI({blob, prompt}){
