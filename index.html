@@ -3,341 +3,314 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Renovatiedirect • Visualisatietool (v1.4.1 Turbo)</title>
+  <title>Renovatie Direct • Visualisatietool</title>
+  <meta name="description" content="Toon de nieuwe kozijnen, deuren en gevelbekleding direct op een foto van de woning." />
   <style>
-    :root { --bg:#fff; --fg:#111; --muted:#666; --line:#e5e5e5; --accent:#111; }
+    /* ====== Brand & thema (pas hier makkelijk kleuren aan) ====== */
+    :root{
+      --brand-navy: #111c2b;   /* donkerblauw/navy (kopteksten, knoppen) */
+      --brand-green:#59b357;   /* Renovatie Direct groen */
+      --brand-blue: #4fa3e3;   /* accentblauw uit icoon */
+      --bg-cream:  #f9f6ea;    /* zachte crème achtergrond */
+      --card:      #ffffff;
+      --text:      #0e1320;
+      --muted:     #647085;
+      --line:      #e7e7ea;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --shadow-1: 0 6px 22px rgba(17,28,43,.06);
+      --shadow-2: 0 12px 28px rgba(17,28,43,.08);
+    }
+
     *{box-sizing:border-box}
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; line-height: 1.5; color:var(--fg); background:var(--bg); }
-    header { margin-bottom: 20px; }
-    h1 { margin: 0 0 8px; }
-    .row { display: flex; gap: 24px; flex-wrap: wrap; }
-    .card { border: 1px solid var(--line); border-radius: 14px; padding: 16px; flex: 1 1 420px; background:#fff; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
-    label { display:block; font-weight:600; margin: 10px 0 6px; }
-    input[type="text"], textarea, select { width:100%; padding:12px; border:1px solid #d0d0d0; border-radius:10px; font-size:15px; }
-    input[type="file"]{ padding: 8px; }
-    .controls { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    button { padding: 12px 16px; border-radius: 10px; border:0; background:var(--accent); color:#fff; font-weight:600; cursor:pointer; }
-    button.secondary { background:#f0f0f0; color:#111; }
-    button[disabled]{ opacity:.6; cursor:not-allowed; }
-    .preview { display: grid; grid-template-columns: repeat(2,minmax(240px,1fr)); gap: 12px; }
-    .imgbox { border:1px dashed #d9d9d9; border-radius: 12px; padding:8px; text-align:center; background:#fafafa; position: relative; }
-    .imgbox img { max-width:100%; height:auto; display:block; margin:0 auto; border-radius:8px; }
-    .hint { color:var(--muted); font-size: 13px; }
-    .error { color: #b00020; }
-    .ok { color: #0a7a0a; }
-    footer { margin-top: 24px; color:var(--muted); font-size: 12px; }
-    .rowcols { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-    .section { border-top:1px solid var(--line); padding-top:10px; margin-top:10px; }
-    .stack { display:grid; gap:8px; }
-    .hambtn { background:#111; color:#fff; border-radius:10px; padding:10px 12px; display:inline-flex; align-items:center; gap:8px; }
-    .panel { display:none; border:1px solid var(--line); border-radius:12px; padding:12px; margin-top:10px; }
-    .panel.open { display:block; }
-    .menu { border:1px solid #e5e5e5; border-radius:12px; padding:10px; margin-top:8px; }
-    .menu .rowcols { grid-template-columns: 1fr 1fr 1fr; }
-    .row3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    .badge {font-size:12px; padding:2px 8px; border:1px solid var(--line); border-radius:8px;}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text); background:var(--bg-cream);
+    }
+
+    /* ====== Header / brand bar ====== */
+    .brandbar{
+      display:flex; align-items:center; gap:14px;
+      padding:16px 20px; background:var(--card);
+      box-shadow: var(--shadow-1);
+      position:sticky; top:0; z-index:20;
+    }
+    .brandbar img{ height:42px; width:auto; border-radius:10px }
+    .brand-title{
+      font-weight:800; letter-spacing:.2px; color:var(--brand-navy);
+      line-height:1;
+    }
+    .brand-badge{
+      margin-left:auto; padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line); color:var(--muted); font-size:12px;
+      background:#fff;
+    }
+
+    /* ====== Hero ====== */
+    .hero{
+      max-width:1100px; margin:32px auto 0; padding:0 16px 8px;
+      display:grid; grid-template-columns: 1.1fr .9fr; gap:20px;
+    }
+    @media (max-width: 980px){ .hero{ grid-template-columns: 1fr; } }
+
+    .tile{
+      background:var(--card);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-2);
+      padding:22px;
+    }
+    .tile h1{
+      margin:6px 0 10px; font-size:28px; line-height:1.2; color:var(--brand-navy);
+    }
+    .lede{ color:var(--muted); margin:0 0 12px; }
+
+    /* ====== Upload/controls ====== */
+    .form{
+      display:grid; gap:14px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 14px; border-radius:999px; background:#eef6ff; color:#114a7b;
+      font-weight:600; font-size:13px;
+    }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }
+
+    label{ font-weight:700; font-size:14px; margin-bottom:6px; display:block; }
+    input[type="file"], select{
+      width:100%; border: 1px solid var(--line); border-radius: var(--radius-md);
+      background:#fff; padding:14px; font-size:15px;
+      box-shadow: inset 0 1px 0 rgba(0,0,0,.02);
+    }
+    .hint{ color:var(--muted); font-size:13px; }
+
+    .actions{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .btn{
+      appearance:none; border:0; cursor:pointer; font-weight:800; letter-spacing:.2px;
+      padding:14px 18px; border-radius:18px; box-shadow: 0 6px 16px rgba(17,28,43,.12);
+      background:linear-gradient(135deg, var(--brand-green), #3aa14b); color:#fff;
+      transition:.2s transform ease, .2s box-shadow ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow:0 10px 22px rgba(17,28,43,.18); }
+    .btn.secondary{
+      background:#fff; color:var(--brand-navy);
+      border:1px solid var(--line);
+      box-shadow: 0 6px 16px rgba(17,28,43,.06);
+    }
+    .status{ min-height:22px; }
+
+    /* ====== Preview ====== */
+    .preview{
+      display:grid; gap:12px;
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (max-width: 720px){ .preview{ grid-template-columns: 1fr; } }
+    .shot{
+      background:#f5f7fa; border:1px dashed var(--line);
+      border-radius: var(--radius-lg); padding:10px; text-align:center;
+    }
+    .shot h4{ margin:4px 0 8px; font-size:13px; color:var(--muted); font-weight:700; letter-spacing:.2px; }
+    .shot img{ display:block; max-width:100%; height:auto; border-radius:12px; }
+
+    /* ====== Footer ====== */
+    .foot{
+      max-width:1100px; margin:18px auto 28px; padding:0 16px;
+      color:var(--muted); font-size:12px; text-align:center;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Renovatiedirect • Visualisatietool</h1>
-    <p class="hint">v1.4.1: <span class="badge">Turbo</span> — <b>1 API-call</b> (alles tegelijk) en output-size <b>auto</b>. Upload blijft 512×512 JPEG voor snelheid.</p>
-  </header>
 
-  <div class="row">
-    <div class="card">
-      <div class="rowcols">
-        <div class="stack">
-          <label for="file">1) Upload foto</label>
-          <input id="file" type="file" accept="image/*" />
+  <!-- Header -->
+  <div class="brandbar">
+    <img src="/logo.png" alt="Renovatie Direct logo" />
+    <div>
+      <div class="brand-title">Renovatie Direct</div>
+      <div style="font-size:12px; color:var(--muted)">Visualisatietool</div>
+    </div>
+    <div class="brand-badge">Beta v1 • snél & overzichtelijk</div>
+  </div>
+
+  <!-- Hero: links controls, rechts preview -->
+  <section class="hero">
+    <div class="tile">
+      <span class="pill">⚡ Snel & eenvoudig</span>
+      <h1>Toon direct hoe het <em>straks</em> wordt</h1>
+      <p class="lede">Upload een foto van de gevel, kies de kozijnkleur en genereer een realistische na-foto. Deuren en eventuele gevelbekleding worden automatisch meegenomen.</p>
+
+      <div class="form">
+        <div>
+          <label for="file">Foto uploaden</label>
+          <input id="file" type="file" accept="image/*">
           <div id="resizeInfo" class="hint"></div>
         </div>
-        <div class="stack">
-          <label for="strength">2) Wijzig-sterkte</label>
-          <input id="strength" type="range" min="0.30" max="0.60" step="0.01" value="0.45" />
-          <span class="hint">Hoger = meer afdwingen (bij hardnekkige oude kleuren).</span>
-        </div>
-      </div>
 
-      <div class="row3">
-        <div>
-          <label for="mode">Modus</label>
-          <select id="mode">
-            <option value="turbo">Turbo (1 call)</option>
-            <option value="ketting">Ketting (meerdere stappen)</option>
-          </select>
-          <span class="hint">Turbo is het snelst; Ketting is iets nauwkeuriger.</span>
-        </div>
-        <div></div><div></div>
-      </div>
-
-      <div class="section">
-        <label>Kozijnen (altijd aanpassen)</label>
-        <div class="rowcols">
-          <select id="kleurKozijn">
-            <option data-hex="#383E42">Antraciet (RAL 7016) verdiept profiel</option>
-            <option data-hex="#F5F6F7">Wit (RAL 9016) verdiept profiel</option>
-            <option data-hex="#E7DCC8">Creme (RAL 9001) verdiept profiel</option>
-            <option data-hex="#273C2C">Donkergroen (RAL 6009) verdiept profiel</option>
-            <option data-hex="#6B4E3D">Bruin (Houtlook) verdiept profiel</option>
-            <option data-hex="#0A0A0A">Zwart (RAL 9005) verdiept profiel</option>
-          </select>
-          <select id="afwerkingKozijn">
-            <option>Mat</option>
-            <option>Zijdeglans</option>
-            <option>Structuur</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="section">
-        <button id="hamburger" class="hambtn" type="button">☰ Opties (deuren & gevelbekleding)</button>
-        <div id="optPanel" class="panel">
-          <div class="menu">
-            <label><input type="checkbox" id="tDeuren" /> Deuren aanpassen</label>
-            <div class="rowcols" id="deurFields" style="display:none;">
-              <select id="kleurDeur">
-                <option data-hex="#383E42">Antraciet (RAL 7016) verdiept profiel</option>
-                <option data-hex="#F5F6F7">Wit (RAL 9016) verdiept profiel</option>
-                <option data-hex="#E7DCC8">Creme (RAL 9001) verdiept profiel</option>
-                <option data-hex="#273C2C">Donkergroen (RAL 6009) verdiept profiel</option>
-                <option data-hex="#6B4E3D">Bruin (Houtlook) verdiept profiel</option>
-                <option data-hex="#0A0A0A">Zwart (RAL 9005) verdiept profiel</option>
-              </select>
-              <select id="paneelDeur">
-                <option>Vol paneel</option>
-                <option>Boven glas, onder paneel</option>
-                <option>Glas met roedes</option>
-              </select>
-              <select id="afwerkingDeur">
-                <option>Mat</option>
-                <option>Zijdeglans</option>
-                <option>Structuur</option>
-              </select>
-            </div>
+        <div class="row">
+          <div>
+            <label for="kleurKozijn">Kozijnkleur</label>
+            <select id="kleurKozijn">
+              <option data-hex="#383E42">Antraciet (RAL 7016) • verdiept profiel</option>
+              <option data-hex="#F5F6F7">Wit (RAL 9016) • verdiept profiel</option>
+              <option data-hex="#E7DCC8">Crème (RAL 9001) • verdiept profiel</option>
+              <option data-hex="#273C2C">Donkergroen (RAL 6009) • verdiept profiel</option>
+              <option data-hex="#6B4E3D">Bruin (houtlook) • verdiept profiel</option>
+              <option data-hex="#0A0A0A">Zwart (RAL 9005) • verdiept profiel</option>
+            </select>
           </div>
-
-          <div class="menu">
-            <label><input type="checkbox" id="tGevel" /> Gevelbekleding aanpassen</label>
-            <div class="rowcols" id="gevelFields" style="display:none;">
-              <select id="kleurGevel">
-                <option>Antraciet (RAL 7016)</option>
-                <option>Wit (RAL 9016)</option>
-                <option>Creme (RAL 9001)</option>
-                <option>Donkergroen (RAL 6009)</option>
-                <option>Bruin (Houtlook)</option>
-                <option>Zwart (RAL 9005)</option>
-              </select>
-              <select id="typeGevel">
-                <option>Horizontale delen</option>
-                <option>Verticale delen</option>
-                <option>Kunststof rabatdelen</option>
-              </select>
-              <select id="afwerkingGevel">
-                <option>Mat</option>
-                <option>Zijdeglans</option>
-                <option>Structuur</option>
-              </select>
-            </div>
+          <div>
+            <label for="afwerking">Afwerking</label>
+            <select id="afwerking">
+              <option>Mat</option>
+              <option>Zijdeglans</option>
+              <option>Structuur</option>
+            </select>
           </div>
         </div>
-      </div>
 
-      <label for="maatwerk">Maatwerk (optioneel)</label>
-      <input id="maatwerk" type="text" placeholder="Bijv. slank verdiept profiel, scherpe randen, ventilatieroosters behouden" />
-
-      <div class="controls" style="margin-top: 8px;">
-        <button id="go">Genereer na-foto</button>
-        <button id="reset" type="button" class="secondary">Reset</button>
+        <div class="actions">
+          <button id="go" class="btn">Genereer na-foto</button>
+          <button id="reset" class="btn secondary" type="button">Reset</button>
+          <span id="status" class="hint status"></span>
+        </div>
+        <details>
+          <summary class="hint">Geavanceerd</summary>
+          <div class="hint">De tool schaalt je foto klein voor een snelle upload en vraagt OpenAI om een realistische 1024p output. We veranderen alleen kozijnen, deuren en eventuele gevelbekleding; rest blijft identiek.</div>
+        </details>
+        <pre id="debug" class="hint" style="white-space:pre-wrap;"></pre>
       </div>
-      <p id="status" class="hint" style="margin-top:8px;"></p>
-      <details style="margin-top:8px;"><summary>Technische details (alleen bij fouten)</summary><pre id="debug" style="white-space:pre-wrap;"></pre></details>
     </div>
 
-    <div class="card">
-      <label>Voorbeeld</label>
+    <div class="tile">
       <div class="preview">
-        <div class="imgbox">
-          <div class="hint">VOOR (512 JPEG)</div>
-          <img id="voorImg" alt="Voorbeeld voor" />
+        <div class="shot">
+          <h4>VOOR</h4>
+          <img id="voorImg" alt="Voorbeeld voor">
         </div>
-        <div class="imgbox">
-          <div class="hint">NA (AI)</div>
-          <img id="naImg" alt="Voorbeeld na" />
+        <div class="shot">
+          <h4>NA (AI)</h4>
+          <img id="naImg" alt="Voorbeeld na">
         </div>
       </div>
-      <div style="margin-top: 12px; display:flex; gap:10px; align-items:center;">
-        <a id="download" download="na-foto.png" style="display:none;" class="button-link">Download na-foto</a>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;">
+        <a id="download" style="display:none" download="na-foto.png" class="btn">Download</a>
         <span id="dlhint" class="hint"></span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <footer>v1.4.1: Turbo (1 call) met size='auto' voor snelheid. Ketting-modus blijft beschikbaar.</footer>
+  <footer class="foot">© Renovatie Direct • Visualisatietool. UI-stijl geïnspireerd op heldere, ronde vormen zoals geldmaat.nl.</footer>
 
   <script>
-    const fileInput = document.getElementById('file');
-    const voorEl = document.getElementById('voorImg');
-    const naEl = document.getElementById('naImg');
-    const statusEl = document.getElementById('status');
-    const debugEl = document.getElementById('debug');
-    const downloadEl = document.getElementById('download');
-    const dlhintEl = document.getElementById('dlhint');
-    const resizeInfo = document.getElementById('resizeInfo');
-    const goBtn = document.getElementById('go');
-    const resetBtn = document.getElementById('reset');
-
-    const strengthInput = document.getElementById('strength');
-    const kleurKozijn = document.getElementById('kleurKozijn');
-    const afwerkingKozijn = document.getElementById('afwerkingKozijn');
-    const maatwerk = document.getElementById('maatwerk');
-    const mode = document.getElementById('mode');
-
-    const hamburger = document.getElementById('hamburger');
-    const optPanel = document.getElementById('optPanel');
-    const tDeuren = document.getElementById('tDeuren');
-    const tGevel = document.getElementById('tGevel');
-    const deurFields = document.getElementById('deurFields');
-    const gevelFields = document.getElementById('gevelFields');
-    const kleurDeur = document.getElementById('kleurDeur');
-    const paneelDeur = document.getElementById('paneelDeur');
-    const afwerkingDeur = document.getElementById('afwerkingDeur');
-    const kleurGevel = document.getElementById('kleurGevel');
-    const typeGevel = document.getElementById('typeGevel');
-    const afwerkingGevel = document.getElementById('afwerkingGevel');
+    // ====== UI helpers ======
+    const $ = (id)=>document.getElementById(id);
+    const fileInput = $("file");
+    const voorEl = $("voorImg");
+    const naEl = $("naImg");
+    const statusEl = $("status");
+    const debugEl = $("debug");
+    const downloadEl = $("download");
+    const dlhintEl = $("dlhint");
+    const resizeInfo = $("resizeInfo");
+    const kleurKozijn = $("kleurKozijn");
+    const afwerking = $("afwerking");
+    const goBtn = $("go");
+    const resetBtn = $("reset");
 
     let preparedBlob = null;
 
-    hamburger.addEventListener('click', ()=> optPanel.classList.toggle('open'));
-    tDeuren.addEventListener('change', ()=> deurFields.style.display = tDeuren.checked ? 'grid':'none');
-    tGevel.addEventListener('change', ()=> gevelFields.style.display = tGevel.checked ? 'grid':'none');
+    function selectedHex(sel){
+      const o = sel.options[sel.selectedIndex];
+      return o ? (o.getAttribute("data-hex")||"") : "";
+    }
 
+    // schaal client-side naar 512 voor upload-snelheid
     async function scaleTo512(file){
       const url = URL.createObjectURL(file);
       const img = new Image(); img.src = url; await img.decode();
-      const canvas = document.createElement('canvas'); canvas.width=512; canvas.height=512;
-      const ctx = canvas.getContext('2d');
+      const canvas = document.createElement("canvas"); canvas.width=512; canvas.height=512;
+      const ctx = canvas.getContext("2d");
       const scale = Math.max(512/img.naturalWidth, 512/img.naturalHeight);
       const dw = Math.round(img.naturalWidth*scale), dh = Math.round(img.naturalHeight*scale);
       const dx = Math.round((512 - dw)/2), dy = Math.round((512 - dh)/2);
+      ctx.fillStyle = "#fff"; ctx.fillRect(0,0,512,512); // neutrale achtergrond
       ctx.drawImage(img, 0,0, img.naturalWidth, img.naturalHeight, dx, dy, dw, dh);
-      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.68));
+      const blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7));
       const outUrl = URL.createObjectURL(blob);
       URL.revokeObjectURL(url);
       return { blob, url: outUrl };
     }
 
-    function selectedHex(sel){
-      const opt = sel.options[sel.selectedIndex];
-      return opt ? (opt.getAttribute('data-hex') || '') : '';
+    function blobToDataURL(blob){
+      return new Promise((resolve,reject)=>{
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = reject;
+        fr.readAsDataURL(blob);
+      });
     }
 
-    function turboPrompt(){
-      const koColor = kleurKozijn.value; const koHEX = selectedHex(kleurKozijn);
-      const koFinish = afwerkingKozijn.value.toLowerCase();
-      const goals = [];
-      goals.push(`WINDOW FRAMES (uPVC): ${koColor} (${koHEX||'requested tone'}), ${koFinish}, recessed/deep profile.`);
-      if (tDeuren.checked){
-        const dHEX = selectedHex(kleurDeur);
-        goals.push(`DOORS (uPVC): ${kleurDeur.value} (${dHEX||'requested tone'}), ${afwerkingDeur.value.toLowerCase()}, panel: ${paneelDeur.value.toLowerCase()}.`);
-      }
-      if (tGevel.checked){
-        goals.push(`CLADDING: ${kleurGevel.value.toLowerCase()}, ${typeGevel.value.toLowerCase()}, ${afwerkingGevel.value.toLowerCase()}.`);
-      }
+    function makePrompt(){
+      const hex = selectedHex(kleurKozijn);
+      const text = kleurKozijn.value;
+      const finish = afwerking.value.toLowerCase();
       return [
-        'Ultra realistic SAME facade. Apply ONLY these targets:',
-        goals.join(' '),
-        'Do NOT change non-target areas: bricks, plaster, roof, gutters, paving, garden, vehicles, sky, curtains, reflections.'
-      ].join(' ');
+        "Ultra realistic SAME facade. Apply ONLY these targets:",
+        `WINDOW FRAMES (uPVC): ${text} (${hex||'requested tone'}), ${finish}, recessed/deep profile.`,
+        "IF PRESENT: also update DOORS and any CLADDING to harmonize with the chosen frame color (same tone & finish).",
+        "Do NOT change non-target areas: bricks, plaster, roof, gutters, paving, garden, vehicles, sky, curtains, reflections."
+      ].join(" ");
     }
 
-    async function sendEditOnce({blob, prompt}){
+    async function callAPI({blob, prompt}){
       const fd = new FormData();
-      fd.append('prompt', prompt);
-      fd.append('size', 'auto'); // voorkomt 512-fout, laat OpenAI de best passende kiezen
+      fd.append("prompt", prompt);
+      fd.append("size", "auto"); // OpenAI kiest geldige output (meestal 1024)
       const dataUrl = await blobToDataURL(blob);
-      fd.append('base', dataUrl);
-      const res = await fetch('/api/generate', { method:'POST', body: fd });
-      const ct = res.headers.get('content-type')||'';
+      fd.append("base", dataUrl);
+
+      const res = await fetch("/api/generate", { method:"POST", body: fd });
+      const ct = res.headers.get("content-type")||"";
       let payload;
-      if (ct.includes('application/json')) payload = await res.json();
-      else { const text = await res.text(); throw new Error('Server gaf geen JSON terug: ' + text.slice(0,200)); }
-      if (!res.ok) throw new Error(payload.error || 'Onbekende fout bij server');
+      if (ct.includes("application/json")) payload = await res.json();
+      else { const text = await res.text(); throw new Error("Server gaf geen JSON terug: " + text.slice(0,160)); }
+      if (!res.ok) throw new Error(payload.error || "Onbekende fout");
       return payload.dataUrl;
     }
 
-    async function sendEditChain({blob, prompts}){
-      let working = blob;
-      for (const p of prompts){
-        const fd = new FormData();
-        fd.append('prompt', p);
-        fd.append('size', 'auto');
-        const dataUrl = await blobToDataURL(working);
-        fd.append('base', dataUrl);
-        const res = await fetch('/api/generate', { method:'POST', body: fd });
-        const ct = res.headers.get('content-type')||'';
-        let payload;
-        if (ct.includes('application/json')) payload = await res.json();
-        else { const text = await res.text(); throw new Error('Server gaf geen JSON terug: ' + text.slice(0,200)); }
-        if (!res.ok) throw new Error(payload.error || 'Onbekende fout bij server');
-        const url = payload.dataUrl;
-        working = dataURLtoBlob(url);
-        naEl.src = url;
-      }
-      return await blobToDataURL(working);
-    }
-
-    function shortPromptFrames(){ const c=kleurKozijn.value; const h=selectedHex(kleurKozijn); return `Repaint ONLY window frames to ${c} (${h||'requested tone'}), recessed profile. Keep all else identical.`; }
-    function shortPromptDoors(){ const h=selectedHex(kleurDeur); const p=paneelDeur.value.toLowerCase(); return `Repaint ONLY doors to ${kleurDeur.value} (${h||'tone'}), panel ${p}. Keep others untouched.`; }
-    function shortPromptCladding(){ const c=kleurGevel.value.toLowerCase(); const t=typeGevel.value.toLowerCase(); const f=afwerkingGevel.value.toLowerCase(); return `Modify ONLY cladding to ${c}, ${t}, ${f}. Keep walls/windows/roof unchanged.`; }
-
-    function dataURLtoBlob(dataurl) { const arr = dataurl.split(','); const mime = arr[0].match(/:(.*?);/)[1]; const bstr = atob(arr[1]); let n = bstr.length; const u8 = new Uint8Array(n); while(n--){ u8[n]=bstr.charCodeAt(n);} return new Blob([u8],{type:mime}); }
-    function blobToDataURL(blob){ return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(blob); }); }
-
-    fileInput.addEventListener('change', async () => {
-      naEl.src = ''; downloadEl.style.display='none';
-      statusEl.textContent=''; debugEl.textContent=''; dlhintEl.textContent='';
-      const f = fileInput.files[0];
-      if (!f){ voorEl.src=''; return; }
-      try {
+    // ====== Events ======
+    fileInput.addEventListener("change", async ()=>{
+      naEl.src = ""; downloadEl.style.display="none"; statusEl.textContent="";
+      const f = fileInput.files[0]; if(!f){ voorEl.src=""; return; }
+      statusEl.textContent = "Foto schalen…";
+      try{
         const out = await scaleTo512(f);
-        preparedBlob = out.blob;
-        voorEl.src = out.url;
-        resizeInfo.textContent = 'Formaat: 512×512 JPEG (klein en snel)';
-        statusEl.textContent = 'Klaar om te genereren.';
-      } catch(e){
-        console.error(e);
-        statusEl.textContent='❌ Fout bij schalen van afbeelding.'; statusEl.className='hint error';
+        preparedBlob = out.blob; voorEl.src = out.url;
+        resizeInfo.textContent = "Formaat: 512×512 JPEG (klein & snel) • output wordt automatisch 1024p";
+        statusEl.textContent = "Klaar om te genereren.";
+      }catch(e){
+        statusEl.textContent = "❌ Fout bij schalen van afbeelding."; debugEl.textContent=String(e);
       }
     });
 
-    resetBtn.addEventListener('click', () => {
-      fileInput.value=''; voorEl.src=''; naEl.src=''; preparedBlob=null;
-      strengthInput.value='0.45'; maatwerk.value='';
-      optPanel.classList.remove('open'); tDeuren.checked=false; tGevel.checked=false;
-      deurFields.style.display='none'; gevelFields.style.display='none';
-      downloadEl.style.display='none'; dlhintEl.textContent=''; statusEl.textContent=''; debugEl.textContent=''; resizeInfo.textContent='';
+    resetBtn.addEventListener("click", ()=>{
+      fileInput.value=""; voorEl.src=""; naEl.src=""; preparedBlob=null;
+      statusEl.textContent=""; debugEl.textContent=""; resizeInfo.textContent=""; downloadEl.style.display="none"; dlhintEl.textContent="";
     });
 
-    goBtn.addEventListener('click', async () => {
-      try {
-        if (!preparedBlob){ statusEl.textContent='📷 Kies eerst een foto.'; statusEl.className='hint error'; return; }
-        statusEl.textContent='Bezig (Turbo)…'; statusEl.className='hint'; debugEl.textContent=''; dlhintEl.textContent='';
-        let resultDataUrl;
-        if (mode.value === 'turbo'){
-          resultDataUrl = await sendEditOnce({ blob: preparedBlob, prompt: turboPrompt() });
-        } else {
-          const prompts = [shortPromptFrames()];
-          if (tDeuren.checked) prompts.push(shortPromptDoors());
-          if (tGevel.checked) prompts.push(shortPromptCladding());
-          resultDataUrl = await sendEditChain({ blob: preparedBlob, prompts });
-        }
-        naEl.src = resultDataUrl;
-        downloadEl.href = resultDataUrl; downloadEl.style.display='inline-block';
-        downloadEl.textContent='Download na-foto'; statusEl.textContent='✅ Klaar!'; statusEl.className='hint ok'; dlhintEl.textContent='Klik op Download om op te slaan.';
-      } catch(err){
-        console.error(err);
-        statusEl.textContent='❌ Fout: ' + (err && err.message? err.message:'Onbekende fout'); statusEl.className='hint error'; debugEl.textContent=String(err && err.stack? err.stack: err);
+    $("go").addEventListener("click", async ()=>{
+      try{
+        if(!preparedBlob){ statusEl.textContent="📷 Kies eerst een foto."; return; }
+        statusEl.textContent = "Bezig…"; debugEl.textContent="";
+        const url = await callAPI({ blob: preparedBlob, prompt: makePrompt() });
+        naEl.src = url;
+        downloadEl.href = url; downloadEl.style.display="inline-flex";
+        dlhintEl.textContent = "Tip: laat de klant inzoomen op details.";
+        statusEl.textContent = "✅ Klaar!";
+      }catch(err){
+        statusEl.textContent = "❌ Fout: " + (err?.message || "Onbekend");
+        debugEl.textContent = String(err?.stack || err);
       }
     });
   </script>
